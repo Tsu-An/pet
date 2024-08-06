@@ -1,3 +1,4 @@
+const { render } = require("ejs");
 const express = require("express");
 const router = express.Router();
 const mysql = require("mysql");
@@ -91,19 +92,27 @@ router.get("/", async (req, res) => {
     );
     const brand = splitFormatsAndImgs(brandData);
 
-    console.log(products);
     //購物車
     const cartItems = await query(
       "SELECT * FROM productshop ps JOIN productformat pf ON ps.fhid = pf.fhid JOIN cartitems ci ON ci.productId = ps.productId WHERE memberId = 2"
     );
-
-    res.status(200).json({
+    // console.log(products);
+    res.json({
       carouselevent, //輪播
       productClass, //產品類別
       products, //熱搜產品
       brand, //同品牌商品
       cartItems, //購物車
+      memberId: 2, //會員
     });
+    // res.render("index.ejs", {
+    //   carouselevent,
+    //   productClass,
+    //   products,
+    //   brand,
+    //   cartItems,
+    //   memberId: 2,
+    // });
   } catch (error) {
     console.log(error);
     res.status(500).send("Server Error");
@@ -111,7 +120,7 @@ router.get("/", async (req, res) => {
 });
 //首頁-增加和修改商品 //這裡要改成抓會員ID
 router.post("/", async (req, res) => {
-  const memberId = req.body.memberId; // 這裡要改成抓會員ID
+  const memberId = (req.body.memberId = 2); // 這裡要改成抓會員ID
   const productId = req.body.productId;
   const quantity = req.body.quantity;
   const price = req.body.price;
@@ -141,12 +150,8 @@ router.post("/", async (req, res) => {
         "INSERT INTO cartitems (memberId, productId, cartQuantity) VALUES (?, ?, ?)",
         [memberId, productId, quantity]
       );
-      // const insertOrders = await query(
-      //   "INSERT INTO orders(memberId, totalPrice, status) VALUES (?,?,'noPay')",
-      //   [memberId, totalPrice]
-      // );
 
-      console.log(insertCartitems, insertOrders);
+      console.log(insertCartitems);
       res.json({ message: "新增購物車成功,新增訂單成功" });
     }
   } catch (error) {
@@ -172,269 +177,142 @@ router.delete("/", async (req, res) => {
   }
 });
 
-//搜尋商品頁
-router.get("/search", async (req, res) => {
-  const word = `%${req.query.name}%`;
-  console.log(word);
+//創建訂單
+router.post("/checkout", async (req, res) => {
+  const memberId = (req.body.memberId = 2);
   try {
-    //品牌
-    const brand = await query("SELECT * FROM productbrand", []);
-    //tag
-    const tag = await query("SELECT * FROM producttag", []);
-    //購物車
+    // 獲取購物車項目
     const cartItems = await query(
-      "SELECT * FROM productshop ps JOIN productformat pf ON ps.fhid = pf.fhid JOIN cartitems ci ON ci.productId = ps.productId WHERE memberId = 2"
+      "SELECT * FROM cartitems WHERE memberId = ?",
+      [memberId]
     );
-    //搜尋到的產品
-    const searchWord = await query(
-      `SELECT * FROM productshop ps JOIN productformat pf ON ps.fhid = pf.fhid WHERE productName LIKE ?`,
-      [word]
+
+    // 創建訂單
+    const orderResult = await query(
+      "INSERT INTO orders (memberId, totalPrice, status) VALUES (?, ?, 'pending')",
+      [memberId, 0]
     );
+    const orderId = orderResult.insertId;
+
+    // 插入訂單項目並計算總價
+    let totalPrice = 0;
+    for (const item of cartItems) {
+      const product = await query(
+        "SELECT price FROM productshop WHERE productId = ?",
+        [item.productId]
+      );
+      const itemPrice = product[0].price * item.cartQuantity;
+      totalPrice += itemPrice;
+
+      await query(
+        "INSERT INTO orderitems (orderId, productId, orderQuantity) VALUES (?, ?, ?)",
+        [orderId, item.productId, item.cartQuantity]
+      );
+    }
+
+    // 更新訂單總價
+    await query("UPDATE orders SET totalPrice = ? WHERE Id = ?", [
+      totalPrice,
+      orderId,
+    ]);
+
+    // 清空購物車 結帳完才清空購物車
+    // await query("DELETE FROM cartitems WHERE memberId = ?", [memberId]);
+
+    res.json({ success: true, orderId: orderId });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "結帳失敗" });
+  }
+});
+
+//訂單畫面
+router.get("/order", async (req, res) => {
+  const memberId = 2; // 假設會員ID為2，實際應該從session獲取
+  try {
+    const order = await query(
+      "SELECT * FROM orders WHERE memberId = ? ORDER BY Id DESC LIMIT 1",
+      [memberId]
+    );
+    const orderItems = await query(
+      `
+          SELECT 
+              oi.*,
+              ps.productName,
+              ps.price,
+              ps.productImg,
+              pf.format AS productFormat
+          FROM 
+              orderitems oi 
+          JOIN 
+              productshop ps ON oi.productId = ps.productId 
+          JOIN 
+              productformat pf ON ps.fhid = pf.fhid
+          WHERE 
+              oi.orderId = ?
+      `,
+      [order[0].Id]
+    );
+    console.log(orderItems);
     res.json({
-      brand, //品牌
-      tag, //關鍵字
-      searchWord, //搜尋到的產品
-      cartItems, //購物車
+      orderItems: orderItems,
+      totalPrice: order[0].totalPrice,
+      memberId: memberId,
+      orderId: order[0].Id,
     });
   } catch (error) {
     console.error(error);
-    res.status(500).send("Server Error!!!");
+    res.status(500).send("獲取訂單詳情失敗");
   }
 });
-//搜尋商品頁-增加和修改商品 //這裡要改成抓會員ID
-router.post("/search", async (req, res) => {
-  const memberId = req.body.memberId; // 這裡要改成抓會員ID
-  const productId = req.body.productId;
-  const quantity = req.body.quantity;
+///
 
+//購物車畫面
+router.get("/cart", async (req, res) => {
+  const memberId = (req.query.memberId = 2);
   try {
-    // 先檢查購物車內是否已經存在相同的商品
-    const existingItem = await query(
-      "SELECT * FROM cartitems WHERE memberId = ? AND productId = ?",
-      [memberId, productId]
-    );
-
-    if (existingItem.length > 0) {
-      // 如果已經存在，則更新數量
-      const result = await query(
-        "UPDATE cartitems SET quantity = ? WHERE memberId = ? AND productId = ?",
-        [quantity, memberId, productId]
-      );
-      console.log(result);
-      res.json({ message: "更新成功" });
-    } else {
-      // 如果不存在，則新增商品
-      const result = await query(
-        "INSERT INTO cartitems (memberId, productId, quantity) VALUES (?, ?, ?)",
-        [memberId, productId, quantity]
-      );
-      console.log(result);
-      res.json({ message: "新增成功" });
-    }
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({ message: "操作失敗" });
-  }
-});
-//搜尋商品頁-刪除
-router.delete("/search", async (req, res) => {
-  const memberId = req.body.memberId;
-  const productId = req.body.productId;
-
-  try {
-    const result = await query(
-      "DELETE FROM cartitems WHERE memberId = ? AND productId = ?",
-      [memberId, productId]
-    );
-    console.log(result);
-    res.json({ message: "刪除成功" });
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({ message: "刪除失敗" });
-  }
-});
-
-//商品class篩選頁
-router.get("/search/class/:productClass", async (req, res) => {
-  try {
-    const brand = await query("SELECT * FROM productbrand", []);
-    const tag = await query("SELECT * FROM producttag", []);
-    const productClass = await query(
-      "SELECT * FROM productshop ps JOIN productandclass pac ON ps.productId = pac.productId JOIN productclass pc ON pac.productClassId = pc.productClassId JOIN productformat pf ON ps.fhid = pf.fhid WHERE productClassname=?",
-      [req.params.productClass]
-    );
-    //購物車
     const cartItems = await query(
-      "SELECT * FROM productshop ps JOIN productformat pf ON ps.fhid = pf.fhid JOIN cartitems ci ON ci.productId = ps.productId WHERE memberId = 2"
+      `SELECT 
+          ps.productName, 
+          ci.productId, 
+          ci.cartQuantity,
+          pf.format AS productFormat,
+          ps.productImg
+      FROM 
+          productshop ps
+      JOIN 
+          cartitems ci ON ci.productId = ps.productId
+      JOIN 
+          productformat pf ON ps.fhid = pf.fhid
+      WHERE 
+          ci.memberId = ?`,
+      [memberId]
     );
-    res.json({
-      brand, //品牌
-      tag, //標籤
-      productClass, //篩選出類別的商品
-      cartItems, //購物車
-    });
+    res.json({ cartItems });
   } catch (error) {
-    console.log(error);
-    res.status(400).json({ message: "失敗" });
+    console.error("Error fetching cart:", error);
+    res.status(500).json({ error: "Failed to fetch cart" });
   }
 });
-//商品class篩選頁-增加和修改商品 //這裡要改成抓會員ID
-router.post("/search/class/:productClass", async (req, res) => {
-  const memberId = req.body.memberId; // 這裡要改成抓會員ID
-  const productId = req.body.productId;
-  const quantity = req.body.quantity;
 
+//最後的結帳
+router.post("/finalOrder", async (req, res) => {
+  const memberId = (req.body.memberId = 2);
+  const orderId = req.body.orderId;
   try {
-    // 先檢查購物車內是否已經存在相同的商品
-    const existingItem = await query(
-      "SELECT * FROM cartitems WHERE memberId = ? AND productId = ?",
-      [memberId, productId]
+    // 更新訂單狀態
+    await query(
+      "UPDATE orders SET status = 'paid off' WHERE Id = ? AND memberId = ?",
+      [orderId, memberId]
     );
 
-    if (existingItem.length > 0) {
-      // 如果已經存在，則更新數量
-      const result = await query(
-        "UPDATE cartitems SET quantity = ? WHERE memberId = ? AND productId = ?",
-        [quantity, memberId, productId]
-      );
-      console.log(result);
-      res.json({ message: "更新成功" });
-    } else {
-      // 如果不存在，則新增商品
-      const result = await query(
-        "INSERT INTO cartitems (memberId, productId, quantity) VALUES (?, ?, ?)",
-        [memberId, productId, quantity]
-      );
-      console.log(result);
-      res.json({ message: "新增成功" });
-    }
+    // 清空購物車
+    await query("DELETE FROM cartitems WHERE memberId = ?", [memberId]);
+
+    res.json({ success: true, message: "訂單已完成結帳" });
   } catch (error) {
-    console.log(error);
-    res.status(400).json({ message: "操作失敗" });
+    console.error("Error finalizing order:", error);
+    res.status(500).json({ success: false, message: "結帳過程中發生錯誤" });
   }
 });
-//商品class篩選頁-刪除
-router.delete("/search/class/:productClass", async (req, res) => {
-  const memberId = req.body.memberId;
-  const productId = req.body.productId;
-
-  try {
-    const result = await query(
-      "DELETE FROM cartitems WHERE memberId = ? AND productId = ?",
-      [memberId, productId]
-    );
-    console.log(result);
-    res.json({ message: "刪除成功" });
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({ message: "刪除失敗" });
-  }
-});
-
-//單項產品頁
-router.get("/search/product/:productId", async (req, res) => {
-  try {
-    //品牌
-    const brand = await query("SELECT * FROM productbrand", []);
-    //tag
-    const tag = await query("SELECT * FROM producttag", []);
-    //單項產品
-    const productId = await query(
-      "SELECT * FROM productshop ps JOIN productformat pf ON ps.fhid = pf.fhid  WHERE productId=?",
-      [req.params.productId]
-    );
-    //購物車
-    const cartItems = await query(
-      "SELECT * FROM productshop ps JOIN productformat pf ON ps.fhid = pf.fhid JOIN cartitems ci ON ci.productId = ps.productId WHERE memberId = 2"
-    );
-    res.json({
-      brand, //品牌
-      tag, //關鍵字
-      productId, //產品ID
-      cartItems, //購物車
-    });
-  } catch (error) {
-    res.status(500).send("Server Error");
-  }
-});
-//單項產品頁-商品加入購物車 //這裡要改成抓會員ID
-router.post("/search/product/:productId", async (req, res) => {
-  const memberId = req.body.memberId; // 這裡要改成抓會員ID
-  const productId = req.body.productId;
-  const quantity = req.body.quantity;
-
-  try {
-    // 先檢查購物車內是否已經存在相同的商品
-    const existingItem = await query(
-      "SELECT * FROM cartitems WHERE memberId = ? AND productId = ?",
-      [memberId, productId]
-    );
-
-    if (existingItem.length > 0) {
-      // 如果已經存在，則更新數量
-      const result = await query(
-        "UPDATE cartitems SET quantity = ? WHERE memberId = ? AND productId = ?",
-        [quantity, memberId, productId]
-      );
-      console.log(result);
-      res.json({ message: "更新成功" });
-    } else {
-      // 如果不存在，則新增商品
-      const result = await query(
-        "INSERT INTO cartitems (memberId, productId, quantity) VALUES (?, ?, ?)",
-        [memberId, productId, quantity]
-      );
-      console.log(result);
-      res.json({ message: "新增成功" });
-    }
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({ message: "操作失敗" });
-  }
-});
-//單項產品頁-刪除
-router.delete("/search/product/:productId", async (req, res) => {
-  const memberId = req.body.memberId;
-  const productId = req.body.productId;
-
-  try {
-    const result = await query(
-      "DELETE FROM cartitems WHERE memberId = ? AND productId = ?",
-      [memberId, productId]
-    );
-    console.log(result);
-    res.json({ message: "刪除成功" });
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({ message: "刪除失敗" });
-  }
-});
-
-//多個tag篩選頁
-// router.get("/search/product/tag", async (req, res) => {
-//   productTagId = req.body.tag1;
-//   try {
-//     const productId = await query(
-//       "SELECT * FROM `producttag` WHERE `productTagId` IN (?) ",
-//       []
-//     );
-
-//     res.json({
-//       productId, //產品ID
-//     });
-//   } catch (error) {
-//     res.status(500).send("Server Error");
-//   }
-// });
-
-//訂單頁
-// router.get("/order", async (req, res) => {
-//   try {
-//     const order = await query(
-//       "SELECT * FROM productshop ps JOIN productformat pf ON ps.fhid = pf.fhid JOIN orderitems oi ON ps.productId=oi.productId JOIN orders od ON od.orderId=oi.orderIdWHERE memberId=2",
-//       [memberId]
-//     );
-//   } catch (error) {}
-// });
-
 module.exports = router;
