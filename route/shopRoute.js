@@ -277,7 +277,9 @@ router.get("/cart", async (req, res) => {
           ci.productId, 
           ci.cartQuantity,
           pf.format AS productFormat,
-          ps.productImg
+          ps.productImg,
+          ps.price,
+		      ps.productDiscount
       FROM 
           productshop ps
       JOIN 
