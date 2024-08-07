@@ -14,13 +14,24 @@ const conn = mysql.createConnection({
 //把formats和productImgs內容用逗號隔開
 
 function splitFormatsAndImgs(products) {
-  return products.map((product) => ({
-    ...product,
-
-    formats: product.formats ? product.formats.split(",") : [],
-    fhids: product.fhids ? product.fhids.split(",") : [],
-    productImgs: product.productImgs ? product.productImgs.split(",") : [],
-  }));
+  return products.map((product) => {
+    return {
+      ...product,
+      formats: product.formats
+        ? product.formats.split(",").map((format) => format.trim())
+        : [],
+      fhids: product.fhids
+        ? product.fhids.split(",").map((fhid) => fhid.trim())
+        : [],
+      prices: product.prices
+        ? product.prices.split(",").map((price) => Number(price))
+        : [],
+      discounts: product.discounts
+        ? product.discounts.split(",").map((discount) => Number(discount))
+        : [],
+      productImgs: product.productImgs ? product.productImgs.split(",") : [],
+    };
+  });
 }
 
 // 將 conn.query 包裝成返回 Promise 的函數
@@ -38,27 +49,27 @@ router.get("/", async (req, res) => {
     );
     //熱搜商品
     const productData = await query(`
-    SELECT 
-        ps.shid,
-        MAX(ps.productId) AS productId,
-        MAX(ps.productName) AS productName,
-        MAX(ps.bhId) AS bhId,
-        MAX(ps.productContent) AS productContent,
-        MAX(ps.productContentimg) AS productContentimg,
-        MAX(ps.price) AS price,
-        MAX(ps.productDiscount) AS productDiscount,
-        MAX(ps.quantity) AS quantity,
-        GROUP_CONCAT(DISTINCT pf.format ORDER BY pf.fhid) AS formats,
-        GROUP_CONCAT(DISTINCT pf.fhid ORDER BY pf.fhid) AS fhids,
-        GROUP_CONCAT(DISTINCT ps.productImg) AS productImgs
-    FROM 
-        productshop ps
-    JOIN 
-        productformat pf ON ps.fhid = pf.fhid
-    WHERE 
-        ps.shid IN (1,2,3,4,5,6)
-    GROUP BY 
-        ps.shid
+        SELECT 
+            ps.shid,
+            MAX(ps.productId) AS productId,
+            MAX(ps.productName) AS productName,
+            MAX(ps.bhId) AS bhId,
+            MAX(ps.productContent) AS productContent,
+            MAX(ps.productContentimg) AS productContentimg,
+            MAX(ps.quantity) AS quantity,
+            GROUP_CONCAT(pf.format ORDER BY pf.fhid) AS formats,
+            GROUP_CONCAT(pf.fhid ORDER BY pf.fhid) AS fhids,
+            GROUP_CONCAT(ps.price ORDER BY pf.fhid) AS prices,
+            GROUP_CONCAT(ps.productDiscount ORDER BY pf.fhid) AS discounts,
+            GROUP_CONCAT(ps.productImg ORDER BY pf.fhid) AS productImgs
+        FROM 
+            productshop ps
+        JOIN 
+            productformat pf ON ps.fhid = pf.fhid
+        WHERE 
+            ps.shid IN (1,2,3,4,5,6)
+        GROUP BY 
+            ps.shid
       `);
 
     const products = splitFormatsAndImgs(productData);
@@ -74,12 +85,12 @@ router.get("/", async (req, res) => {
           MAX(ps.productName) AS productName,
           MAX(ps.productContent) AS productContent,
           MAX(ps.productContentimg) AS productContentimg,
-          MAX(ps.price) AS price,
-          MAX(ps.productDiscount) AS productDiscount,
           MAX(ps.quantity) AS quantity,
-          GROUP_CONCAT(DISTINCT pf.format ORDER BY pf.fhid) AS formats,
-          GROUP_CONCAT(DISTINCT pf.fhid ORDER BY pf.fhid) AS fhids,
-          GROUP_CONCAT(DISTINCT ps.productImg) AS productImgs
+          GROUP_CONCAT(pf.format ORDER BY pf.fhid) AS formats,
+          GROUP_CONCAT(pf.fhid ORDER BY pf.fhid) AS fhids,
+          GROUP_CONCAT(ps.price ORDER BY pf.fhid) AS prices,
+          GROUP_CONCAT(ps.productDiscount ORDER BY pf.fhid) AS discounts,
+          GROUP_CONCAT(ps.productImg ORDER BY pf.fhid) AS productImgs
       FROM 
           productbrand pb 
       JOIN 
