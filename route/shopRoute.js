@@ -12,10 +12,13 @@ const conn = mysql.createConnection({
 });
 
 //把formats和productImgs內容用逗號隔開
+
 function splitFormatsAndImgs(products) {
   return products.map((product) => ({
     ...product,
+
     formats: product.formats ? product.formats.split(",") : [],
+    fhids: product.fhids ? product.fhids.split(",") : [],
     productImgs: product.productImgs ? product.productImgs.split(",") : [],
   }));
 }
@@ -35,27 +38,27 @@ router.get("/", async (req, res) => {
     );
     //熱搜商品
     const productData = await query(`
-      SELECT 
-      ps.shid,
-      MAX(ps.productId) AS productId,
-      MAX(ps.productName) AS productName,
-      MAX(ps.fhid) AS fhid,
-      MAX(ps.bhId) AS bhId,
-      MAX(ps.productContent) AS productContent,
-      MAX(ps.productContentimg) AS productContentimg,
-      MAX(ps.price) AS price,
-      MAX(ps.productDiscount) AS productDiscount,
-      MAX(ps.quantity) AS quantity,
-      GROUP_CONCAT(DISTINCT pf.format) AS formats,
-      GROUP_CONCAT(DISTINCT ps.productImg) AS productImgs
-      FROM 
-      productshop ps 
-      JOIN 
-      productformat pf ON ps.fhid = pf.fhid 
-      WHERE 
-      ps.shid IN (1,2,3,4,5,6)
-      GROUP BY 
-      ps.shid
+    SELECT 
+        ps.shid,
+        MAX(ps.productId) AS productId,
+        MAX(ps.productName) AS productName,
+        MAX(ps.bhId) AS bhId,
+        MAX(ps.productContent) AS productContent,
+        MAX(ps.productContentimg) AS productContentimg,
+        MAX(ps.price) AS price,
+        MAX(ps.productDiscount) AS productDiscount,
+        MAX(ps.quantity) AS quantity,
+        GROUP_CONCAT(DISTINCT pf.format ORDER BY pf.fhid) AS formats,
+        GROUP_CONCAT(DISTINCT pf.fhid ORDER BY pf.fhid) AS fhids,
+        GROUP_CONCAT(DISTINCT ps.productImg) AS productImgs
+    FROM 
+        productshop ps
+    JOIN 
+        productformat pf ON ps.fhid = pf.fhid
+    WHERE 
+        ps.shid IN (1,2,3,4,5,6)
+    GROUP BY 
+        ps.shid
       `);
 
     const products = splitFormatsAndImgs(productData);
@@ -64,31 +67,31 @@ router.get("/", async (req, res) => {
     //同品牌商品
     const brandData = await query(
       `SELECT 
-      pb.bhId,
-      pb.brand,
-      ps.shid,
-      MAX(ps.productId) AS productId,
-      MAX(ps.productName) AS productName,
-      MAX(ps.fhid) AS fhid,
-      MAX(ps.productContent) AS productContent,
-      MAX(ps.productContentimg) AS productContentimg,
-      MAX(ps.price) AS price,
-      MAX(ps.productDiscount) AS productDiscount,
-      MAX(ps.quantity) AS quantity,
-      GROUP_CONCAT(DISTINCT pf.format) AS formats,
-      GROUP_CONCAT(DISTINCT ps.productImg) AS productImgs
+          pb.bhId,
+          pb.brand,
+          ps.shid,
+          MAX(ps.productId) AS productId,
+          MAX(ps.productName) AS productName,
+          MAX(ps.productContent) AS productContent,
+          MAX(ps.productContentimg) AS productContentimg,
+          MAX(ps.price) AS price,
+          MAX(ps.productDiscount) AS productDiscount,
+          MAX(ps.quantity) AS quantity,
+          GROUP_CONCAT(DISTINCT pf.format ORDER BY pf.fhid) AS formats,
+          GROUP_CONCAT(DISTINCT pf.fhid ORDER BY pf.fhid) AS fhids,
+          GROUP_CONCAT(DISTINCT ps.productImg) AS productImgs
       FROM 
-      productbrand pb 
+          productbrand pb 
       JOIN 
-      productshop ps ON pb.bhId = ps.bhId 
+          productshop ps ON pb.bhId = ps.bhId 
       JOIN 
-      productformat pf ON ps.fhid = pf.fhid 
+          productformat pf ON ps.fhid = pf.fhid 
       WHERE 
-      pb.bhId = 6
+          pb.bhId = 6
       GROUP BY 
-      pb.bhId, ps.shid
+          pb.bhId, ps.shid
       ORDER BY 
-      ps.shid`
+          ps.shid`
     );
     const brand = splitFormatsAndImgs(brandData);
 
@@ -118,62 +121,82 @@ router.get("/", async (req, res) => {
     res.status(500).send("Server Error");
   }
 });
-//首頁-增加和修改商品 //這裡要改成抓會員ID
-router.post("/", async (req, res) => {
-  const memberId = (req.body.memberId = 2); // 這裡要改成抓會員ID
-  const productId = req.body.productId;
-  const quantity = req.body.quantity;
-  const price = req.body.price;
-  const totalPrice = req.body.quantity * price;
-  console.log(totalPrice);
-  //總金額
+
+//購物車畫面
+router.get("/cart", async (req, res) => {
+  const memberId = req.query.memberId || 2;
   try {
-    // 先檢查購物車內是否已經存在相同的商品
-    const existingItem = await query(
-      "SELECT * FROM cartitems WHERE memberId = ? AND productId = ?",
-      [memberId, productId]
+    const cartItems = await query(
+      `SELECT 
+            c.productId, 
+            c.cartQuantity, 
+            c.fhid, 
+            p.productName, 
+            p.productImg,  
+            pf.format
+        FROM 
+            cartitems c
+        JOIN 
+            productshop p ON c.productId = p.productId
+        JOIN 
+            productformat pf ON c.fhid = pf.fhid
+        WHERE 
+            c.memberId = ?`,
+      [memberId]
     );
 
-    if (existingItem.length > 0) {
-      // 如果已經存在，則更新數量
-      const cartItemsresult = await query(
-        "UPDATE cartitems SET cartQuantity = ? WHERE memberId = ? AND productId = ?",
-        [quantity, memberId, productId]
-      );
-      //加入會員訂單
-      // const orders = await query("", []);
-      console.log(cartItemsresult);
-      res.json({ message: "更新購物車成功" });
-    } else {
-      // 如果不存在，則新增商品到購物車 會員訂單 商品訂單
-      const insertCartitems = await query(
-        "INSERT INTO cartitems (memberId, productId, cartQuantity) VALUES (?, ?, ?)",
-        [memberId, productId, quantity]
-      );
-
-      console.log(insertCartitems);
-      res.json({ message: "新增購物車成功,新增訂單成功" });
-    }
+    res.json({ cartItems });
   } catch (error) {
-    console.log(error);
-    res.status(400).json({ message: "操作失敗" });
+    console.error("Error fetching cart:", error);
+    res.status(500).json({ error: "Failed to fetch cart" });
   }
 });
-//首頁-刪除
-router.delete("/", async (req, res) => {
+//首頁-購物車-增加和修改商品 //這裡要改成抓會員ID
+router.post("/", async (req, res) => {
   const memberId = req.body.memberId;
   const productId = req.body.productId;
+  const quantity = req.body.quantity;
+  const fhid = req.body.fhid;
 
   try {
-    const result = await query(
-      "DELETE FROM cartitems WHERE memberId = ? AND productId = ?",
-      [memberId, productId]
+    const existingItem = await query(
+      "SELECT * FROM cartitems WHERE memberId = ? AND productId = ? AND fhid = ?",
+      [memberId, productId, fhid]
     );
-    console.log(result);
-    res.json({ message: "刪除成功" });
+    console.log(existingItem);
+    if (existingItem.length > 0) {
+      await query(
+        "UPDATE cartitems SET cartQuantity = cartQuantity + ? WHERE memberId = ? AND productId = ? AND fhid = ?",
+        [quantity, memberId, productId, fhid]
+      );
+    } else {
+      await query(
+        "INSERT INTO cartitems (memberId, productId, cartQuantity, fhid) VALUES (?, ?, ?, ?)",
+        [memberId, productId, quantity, fhid]
+      );
+    }
+
+    res.json({ message: "商品已成功加入購物車" });
   } catch (error) {
-    console.log(error);
-    res.status(400).json({ message: "刪除失敗" });
+    console.error("Error adding to cart:", error);
+    res.status(500).json({ error: "加入購物車失敗" });
+  }
+});
+//首頁-購物車-刪除
+router.delete("/", async (req, res) => {
+  const memberId = req.body.memberId || 2;
+  const productId = req.body.productId;
+  const fhid = req.body.fhid; // 這裡接收的是 fhid
+
+  try {
+    await query(
+      "DELETE FROM cartitems WHERE memberId = ? AND productId = ? AND fhid = ?",
+      [memberId, productId, fhid]
+    );
+    res.json({ message: "Item removed from cart" });
+  } catch (error) {
+    console.error("Error removing item from cart:", error);
+    res.status(400).json({ message: "Failed to remove item from cart" });
   }
 });
 
@@ -266,36 +289,6 @@ router.get("/order", async (req, res) => {
   }
 });
 ///
-
-//購物車畫面
-router.get("/cart", async (req, res) => {
-  const memberId = (req.query.memberId = 2);
-  try {
-    const cartItems = await query(
-      `SELECT 
-          ps.productName, 
-          ci.productId, 
-          ci.cartQuantity,
-          pf.format AS productFormat,
-          ps.productImg,
-          ps.price,
-		      ps.productDiscount
-      FROM 
-          productshop ps
-      JOIN 
-          cartitems ci ON ci.productId = ps.productId
-      JOIN 
-          productformat pf ON ps.fhid = pf.fhid
-      WHERE 
-          ci.memberId = ?`,
-      [memberId]
-    );
-    res.json({ cartItems });
-  } catch (error) {
-    console.error("Error fetching cart:", error);
-    res.status(500).json({ error: "Failed to fetch cart" });
-  }
-});
 
 //最後的結帳
 router.post("/finalOrder", async (req, res) => {
