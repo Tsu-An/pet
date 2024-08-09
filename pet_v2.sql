@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- 主機： 127.0.0.1
--- 產生時間： 2024-08-08 16:43:38
+-- 產生時間： 2024-08-09 17:24:09
 -- 伺服器版本： 10.4.32-MariaDB
 -- PHP 版本： 8.2.12
 
@@ -251,9 +251,17 @@ INSERT INTO `carouselevent` (`EventId`, `eventName`, `eventImg`, `startTime`, `e
 CREATE TABLE `cartitems` (
   `memberId` int(11) NOT NULL,
   `productId` int(11) NOT NULL,
-  `cartQuantity` int(11) NOT NULL,
-  `fhid` int(10) NOT NULL
+  `cartQuantity` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- 傾印資料表的資料 `cartitems`
+--
+
+INSERT INTO `cartitems` (`memberId`, `productId`, `cartQuantity`) VALUES
+(2, 1, 2),
+(2, 3, 1),
+(2, 12, 1);
 
 -- --------------------------------------------------------
 
@@ -1155,7 +1163,7 @@ INSERT INTO `productshop` (`productId`, `productName`, `shid`, `fhid`, `bhId`, `
 (20, '《wanwan》黑酵母75ml｜犬用｜寵物營養口服液', 7, 16, 6, 'https://i.postimg.cc/mDMt2jB5/Aureo-75ml.jpg', '■ 日本原裝進口：GMP認證自家工廠生產。\r\n■ 多國專利認證：榮獲51項專利，證明效果與安全性。\r\n■ 富含β-Glucan：維持寵物免疫力。\r\n■ EF乳酸菌：調整腸道菌叢生態，維持腸道健康。\r\n■ 100%純天然無添加：凝膠狀易吞嚥好吸收\r\n\r\n【規格】\r\n■ 容量：75ml（5ml x 15包）\r\n■ 注意事項：\r\n■ 產地：日本\r\n■ 適用對象：狗', NULL, 200, 1, 100),
 (21, '《wanwan》菇菌特攻隊菇蕈粉70g｜藥食菇蕈系列', 8, 17, 6, 'https://i.postimg.cc/wTj2kzv7/Animal-Essentials-70g.jpg', '■ 全方位健康支持：專為毛孩提供全面營養。\r\n■ 消化道腸胃保健：獨特配方維護腸胃健康，幫助消化。\r\n■ 維持免疫力：維持身體抵抗力。\r\n■ 100% 菇蕈高濃度配方：採用高濃度菇蕈，確保營養成分的豐富。\r\n \r\n【規格】\r\n■ 容量：70g\r\n■ 產地：美國 \r\n■ 適用對象：狗／貓', NULL, 300, 1, 100),
 (22, '《wanwan》免疫健康60g｜熱激活保健系列', 9, 18, 6, 'https://i.postimg.cc/3rXdstLy/bare-good-60g.jpg', '■ 專利熱激活敏感複合乳酸菌LP28 & M1，維持自然免疫力與抵抗力。\r\n■ 滋補強身，全方支持整體健康。\r\n\r\n【規格】\r\n■ 容量：60g\r\n■ 建議攝取量：5公斤每日食用1克以此類推。\r\n■ 餵食方式：將粉末灑在寵物飼料或食物即可。\r\n■ 注意事項：魚骨鈣及牛初乳粉在噴粉過程會產生淡黃色或咖啡色的焦化小顆粒，為正常現象，請安心食用。\r\n■ 產地：台灣\r\n■ 適用對象：狗／貓', NULL, 300, 0.8, 100),
-(23, '《wanwan》每日超級保健55顆', 10, 19, 6, 'https://i.postimg.cc/63spSZnL/GO-VITA-55.jpg', '■ 四種超級食物組合，每日必須的全面營養保健。\r\n■ 維他命C加乘吸收，增加寵物自然抵抗力。\r\n■ 有助維持呼吸道和泌尿道的整體健康。\r\n■ 蔓越莓提供抗氧化效果，讓毛孩健康無憂。\r\n■ 方便餵食方式，膠囊粉末可混入食物中，簡單又方便。\r\n\r\n【規格】\r\n■ 容量：55 顆 \r\n■ 產地：台灣 \r\n■ 適用對象：狗／貓', NULL, 200, 0.8, 100),
+(23, '《wanwan》每日超級保健55顆', 10, 18, 6, 'https://i.postimg.cc/63spSZnL/GO-VITA-55.jpg', '■ 四種超級食物組合，每日必須的全面營養保健。\r\n■ 維他命C加乘吸收，增加寵物自然抵抗力。\r\n■ 有助維持呼吸道和泌尿道的整體健康。\r\n■ 蔓越莓提供抗氧化效果，讓毛孩健康無憂。\r\n■ 方便餵食方式，膠囊粉末可混入食物中，簡單又方便。\r\n\r\n【規格】\r\n■ 容量：55 顆 \r\n■ 產地：台灣 \r\n■ 適用對象：狗／貓', NULL, 200, 0.8, 100),
 (24, '《wanwan》免疫健康55顆', 10, 19, 6, 'https://i.postimg.cc/tgng2kZ4/GO-VITA-55.jpg', '■ 融合EpiCor®專利酵母和韓國專利發酵紅蔘，提供全方位營養補充。\r\n■ EpiCor®專利酵母含有維生素、礦物質、胺基酸和抗氧化物，具有抗氧化作用。\r\n■ 韓國專利發酵紅蔘滋補強身，提供寵物所需的營養。\r\n■ 增強寵物自然抵抗力，維護健康狀態。\r\n■ 方便易用的膠囊餵食方式，讓寵物每天都能輕鬆享受健康生活。\r\n\r\n【規格】\r\n■ 容量：55 顆 \r\n■ 產地：台灣 \r\n■ 適用對象：狗／貓', NULL, 200, 0.8, 0),
 (25, '《wanwan》無敵菇蕈王NATURES IMMUNO 100ml', 11, 17, 6, 'https://i.postimg.cc/x8nTjSsX/NHV-NATURES-IMMUNO-100ml.jpg', '■ 多種藥食菇菌配方：抗氧化複合配方有助於抵抗自由基對身體的傷害，滋補強身維持活力，維持整體健康。\r\n■ 純度精準植物萃取：高品質廣譜植物萃取，保證純淨成分。\r\n■ 25年專業經驗：獸醫+藥草學家研製配方，100%天然成分。\r\n■ 獨家營養配方：根據犬貓特性和營養需求，守護毛孩健康飲食。\r\n\r\n【規格】\r\n■ 容量：100ml \r\n■ 產地：加拿大 \r\n■ 適用對象：狗／貓', NULL, 300, 1, 100),
 (26, '《wanwan》綜合營養飲MULTI ESSENTIALS 100ml', 11, 21, 6, 'https://i.postimg.cc/4yP4mFMB/NHV-MULTI-ESSENTIALS-100ml.jpg', '■ 植物營養補充：以植物為基底的綜合營養素，提供完整均衡營養，滋補強身。\r\n■ 廣譜植物萃取，純度精準：天然植物成分，營養補充不含雜質。\r\n■ 25年專業經驗：獸醫+藥草學家研製，安心選擇。\r\n■ 100%天然配方：無人工色素、防腐劑和輻射汙染，寵物健康首選。\r\n\r\n【規格】\r\n■ 容量：100ml \r\n■ 產地：加拿大 \r\n■ 適用對象：狗／貓', NULL, 200, 1, 100);
@@ -1298,7 +1306,7 @@ ALTER TABLE `carouselevent`
 -- 資料表索引 `cartitems`
 --
 ALTER TABLE `cartitems`
-  ADD PRIMARY KEY (`memberId`,`productId`,`fhid`),
+  ADD PRIMARY KEY (`memberId`,`productId`) USING BTREE,
   ADD KEY `productId` (`productId`),
   ADD KEY `memberId` (`memberId`);
 
@@ -1430,7 +1438,8 @@ ALTER TABLE `productclass`
 -- 資料表索引 `productformat`
 --
 ALTER TABLE `productformat`
-  ADD PRIMARY KEY (`fhid`);
+  ADD PRIMARY KEY (`fhid`),
+  ADD KEY `fhid` (`fhid`);
 
 --
 -- 資料表索引 `productshop`
@@ -1474,13 +1483,13 @@ ALTER TABLE `members`
 -- 使用資料表自動遞增(AUTO_INCREMENT) `orderitems`
 --
 ALTER TABLE `orderitems`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
 
 --
 -- 使用資料表自動遞增(AUTO_INCREMENT) `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- 使用資料表自動遞增(AUTO_INCREMENT) `pets`
@@ -1561,4 +1570,3 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-
