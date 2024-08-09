@@ -110,22 +110,22 @@ router.get("/", async (req, res) => {
       "SELECT * FROM productshop ps JOIN productformat pf ON ps.fhid = pf.fhid JOIN cartitems ci ON ci.productId = ps.productId WHERE memberId = 2"
     );
     // console.log(products);
-    res.json({
-      carouselevent, //輪播
-      productClass, //產品類別
-      products, //熱搜產品
-      brand, //同品牌商品
-      cartItems, //購物車
-      memberId: 2, //會員
-    });
-    // res.render("index.ejs", {
-    //   carouselevent,
-    //   productClass,
-    //   products,
-    //   brand,
-    //   cartItems,
-    //   memberId: 2,
+    // res.json({
+    //   carouselevent, //輪播
+    //   productClass, //產品類別
+    //   products, //熱搜產品
+    //   brand, //同品牌商品
+    //   cartItems, //購物車
+    //   memberId: 2, //會員
     // });
+    res.render("index.ejs", {
+      carouselevent,
+      productClass,
+      products,
+      brand,
+      cartItems,
+      memberId: 2,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).send("Server Error");
