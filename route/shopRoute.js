@@ -16,6 +16,9 @@ function splitFormatsAndImgs(products) {
   return products.map((product) => {
     return {
       ...product,
+      productIds: product.productId
+        ? product.productId.split(",").map((productId) => productId.trim())
+        : [],
       formats: product.formats
         ? product.formats.split(",").map((format) => format.trim())
         : [],
@@ -48,40 +51,11 @@ router.get("/", async (req, res) => {
     );
     //熱搜商品
     const productData = await query(`
-        SELECT 
-            ps.shid,
-            MAX(ps.productId) AS productId,
-            MAX(ps.productName) AS productName,
-            MAX(ps.bhId) AS bhId,
-            MAX(ps.productContent) AS productContent,
-            MAX(ps.productContentimg) AS productContentimg,
-            MAX(ps.quantity) AS quantity,
-            GROUP_CONCAT(pf.format ORDER BY pf.fhid) AS formats,
-            GROUP_CONCAT(pf.fhid ORDER BY pf.fhid) AS fhids,
-            GROUP_CONCAT(ps.price ORDER BY pf.fhid) AS prices,
-            GROUP_CONCAT(ps.productDiscount ORDER BY pf.fhid) AS discounts,
-            GROUP_CONCAT(ps.productImg ORDER BY pf.fhid) AS productImgs
-        FROM 
-            productshop ps
-        JOIN 
-            productformat pf ON ps.fhid = pf.fhid
-        WHERE 
-            ps.shid IN (1,2,3,4,5,6)
-        GROUP BY 
-            ps.shid
-      `);
-
-    const products = splitFormatsAndImgs(productData);
-
-    // console.log(products);
-    //同品牌商品
-    const brandData = await query(
-      `SELECT 
-          pb.bhId,
-          pb.brand,
+      SELECT 
           ps.shid,
-          MAX(ps.productId) AS productId,
+          GROUP_CONCAT(DISTINCT ps.productId ORDER BY pf.fhid) AS productId,
           MAX(ps.productName) AS productName,
+          MAX(ps.bhId) AS bhId,
           MAX(ps.productContent) AS productContent,
           MAX(ps.productContentimg) AS productContentimg,
           MAX(ps.quantity) AS quantity,
@@ -91,16 +65,45 @@ router.get("/", async (req, res) => {
           GROUP_CONCAT(ps.productDiscount ORDER BY pf.fhid) AS discounts,
           GROUP_CONCAT(ps.productImg ORDER BY pf.fhid) AS productImgs
       FROM 
-          productbrand pb 
+          productshop ps
       JOIN 
-          productshop ps ON pb.bhId = ps.bhId 
-      JOIN 
-          productformat pf ON ps.fhid = pf.fhid 
+          productformat pf ON ps.fhid = pf.fhid
       WHERE 
-          pb.bhId = 6
+          ps.shid IN (1,2,3,4,5,6)
       GROUP BY 
+          ps.shid
+      `);
+
+    const products = splitFormatsAndImgs(productData);
+
+    // console.log(products);
+    //同品牌商品
+    const brandData = await query(
+      `SELECT
+          pb.bhId,
+          pb.brand,
+          ps.shid,
+          GROUP_CONCAT(DISTINCT ps.productId ORDER BY pf.fhid) AS productId,
+          MAX(ps.productName) AS productName,
+          MAX(ps.productContent) AS productContent,
+          MAX(ps.productContentimg) AS productContentimg,
+          MAX(ps.quantity) AS quantity,
+          GROUP_CONCAT(pf.format ORDER BY pf.fhid) AS formats,
+          GROUP_CONCAT(pf.fhid ORDER BY pf.fhid) AS fhids,
+          GROUP_CONCAT(ps.price ORDER BY pf.fhid) AS prices,
+          GROUP_CONCAT(ps.productDiscount ORDER BY pf.fhid) AS discounts,
+          GROUP_CONCAT(ps.productImg ORDER BY pf.fhid) AS productImgs
+      FROM
+          productbrand pb
+      JOIN
+          productshop ps ON pb.bhId = ps.bhId
+      JOIN
+          productformat pf ON ps.fhid = pf.fhid
+      WHERE
+          pb.bhId = 6
+      GROUP BY
           pb.bhId, ps.shid
-      ORDER BY 
+      ORDER BY
           ps.shid`
     );
     const brand = splitFormatsAndImgs(brandData);
@@ -110,22 +113,22 @@ router.get("/", async (req, res) => {
       "SELECT * FROM productshop ps JOIN productformat pf ON ps.fhid = pf.fhid JOIN cartitems ci ON ci.productId = ps.productId WHERE memberId = 2"
     );
     // console.log(products);
-    // res.json({
-    //   carouselevent, //輪播
-    //   productClass, //產品類別
-    //   products, //熱搜產品
-    //   brand, //同品牌商品
-    //   cartItems, //購物車
-    //   memberId: 2, //會員
-    // });
-    res.render("index.ejs", {
-      carouselevent,
-      productClass,
-      products,
-      brand,
-      cartItems,
-      memberId: 2,
+    res.json({
+      carouselevent, //輪播
+      productClass, //產品類別
+      products, //熱搜產品
+      // brand, //同品牌商品
+      cartItems, //購物車
+      memberId: 2, //會員
     });
+    // res.render("index.ejs", {
+    //   carouselevent,
+    //   productClass,
+    //   products,
+    //   brand,
+    //   cartItems,
+    //   memberId: 2,
+    // });
   } catch (error) {
     console.log(error);
     res.status(500).send("Server Error");
@@ -138,22 +141,21 @@ router.get("/cart", async (req, res) => {
   try {
     const cartItems = await query(
       `SELECT 
-          ps.productId,
-          ps.productName,
-          ci.fhid,
-          pf.format,
-          ps.productImg,
-          ps.price,
-          ps.productDiscount,
-          ci.cartQuantity
-      FROM 
-          cartitems ci
-      JOIN 
-          productshop ps ON ci.productId = ps.productId AND ci.fhid = ps.fhid
-      JOIN 
-          productformat pf ON ci.fhid = pf.fhid
-      WHERE 
-          ci.memberId = ?`,
+            ps.productId,
+            ps.productName,          
+            pf.format,
+            ps.productImg,
+            ps.price,
+            ps.productDiscount,
+            ci.cartQuantity
+        FROM 
+            cartitems ci
+        JOIN 
+            productshop ps ON ci.productId = ps.productId
+        JOIN 
+            productformat pf ON ps.fhid = pf.fhid
+        WHERE 
+            ci.memberId = ?`,
       [memberId]
     );
 
@@ -168,23 +170,23 @@ router.post("/", async (req, res) => {
   const memberId = req.body.memberId;
   const productId = req.body.productId;
   const quantity = req.body.quantity;
-  const fhid = req.body.fhid;
 
   try {
     const existingItem = await query(
-      "SELECT * FROM cartitems WHERE memberId = ? AND productId = ? AND fhid = ?",
-      [memberId, productId, fhid]
+      "SELECT * FROM cartitems WHERE memberId = ? AND productId = ?",
+      [memberId, productId]
     );
     console.log(existingItem);
+
     if (existingItem.length > 0) {
       await query(
-        "UPDATE cartitems SET cartQuantity = cartQuantity + ? WHERE memberId = ? AND productId = ? AND fhid = ?",
-        [quantity, memberId, productId, fhid]
+        "UPDATE cartitems SET cartQuantity = cartQuantity + ? WHERE memberId = ? AND productId = ?",
+        [quantity, memberId, productId]
       );
     } else {
       await query(
-        "INSERT INTO cartitems (memberId, productId, cartQuantity, fhid) VALUES (?, ?, ?, ?)",
-        [memberId, productId, quantity, fhid]
+        "INSERT INTO cartitems (memberId, productId, cartQuantity) VALUES (?, ?, ?)",
+        [memberId, productId, quantity]
       );
     }
 
@@ -194,17 +196,42 @@ router.post("/", async (req, res) => {
     res.status(500).json({ error: "加入購物車失敗" });
   }
 });
+//更新購物車數量
+router.post("/cart/update", async (req, res) => {
+  const memberId = req.body.memberId;
+  const productId = req.body.productId;
+  const quantity = req.body.quantity;
+
+  try {
+    const existingItem = await query(
+      "SELECT * FROM cartitems WHERE memberId = ? AND productId = ?",
+      [memberId, productId]
+    );
+    console.log(existingItem);
+
+    if (existingItem.length > 0) {
+      await query(
+        "UPDATE cartitems SET cartQuantity = ? WHERE memberId = ? AND productId = ?",
+        [quantity, memberId, productId]
+      );
+    }
+    res.json({ message: "商品數量已成功更新" });
+  } catch (error) {
+    console.error("Error adding to cart:", error);
+    res.status(500).json({ error: "商品數量更新失敗" });
+  }
+});
+
 //首頁-購物車-刪除
 router.delete("/", async (req, res) => {
   const memberId = req.body.memberId || 2;
   const productId = req.body.productId;
-  const fhid = req.body.fhid; // 這裡接收的是 fhid
 
   try {
-    await query(
-      "DELETE FROM cartitems WHERE memberId = ? AND productId = ? AND fhid = ?",
-      [memberId, productId, fhid]
-    );
+    await query("DELETE FROM cartitems WHERE memberId = ? AND productId = ? ", [
+      memberId,
+      productId,
+    ]);
     res.json({ message: "Item removed from cart" });
   } catch (error) {
     console.error("Error removing item from cart:", error);
