@@ -12,7 +12,6 @@ const conn = mysql.createConnection({
 });
 
 //把formats和productImgs內容用逗號隔開
-
 function splitFormatsAndImgs(products) {
   return products.map((product) => {
     return {
@@ -143,7 +142,9 @@ router.get("/cart", async (req, res) => {
             c.cartQuantity, 
             c.fhid, 
             p.productName, 
-            p.productImg,  
+            p.productImg, 
+            p.price,
+            p.productDiscount,
             pf.format
         FROM 
             cartitems c
