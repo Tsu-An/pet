@@ -138,22 +138,22 @@ router.get("/cart", async (req, res) => {
   try {
     const cartItems = await query(
       `SELECT 
-            c.productId, 
-            c.cartQuantity, 
-            c.fhid, 
-            p.productName, 
-            p.productImg, 
-            p.price,
-            p.productDiscount,
-            pf.format
-        FROM 
-            cartitems c
-        JOIN 
-            productshop p ON c.productId = p.productId
-        JOIN 
-            productformat pf ON c.fhid = pf.fhid
-        WHERE 
-            c.memberId = ?`,
+          ps.productId,
+          ps.productName,
+          ci.fhid,
+          pf.format,
+          ps.productImg,
+          ps.price,
+          ps.productDiscount,
+          ci.cartQuantity
+      FROM 
+          cartitems ci
+      JOIN 
+          productshop ps ON ci.productId = ps.productId AND ci.fhid = ps.fhid
+      JOIN 
+          productformat pf ON ci.fhid = pf.fhid
+      WHERE 
+          ci.memberId = ?`,
       [memberId]
     );
 
