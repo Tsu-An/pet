@@ -2,9 +2,10 @@ const { render } = require("ejs");
 var express = require("express");
 var mysql = require("mysql");
 var app = express();
+const router = express.Router();
 //測試0805
 const shopRoute = require("./route/shopRoute"); //後面放shop路徑
-
+const healthRoute = require("./route/healthRoute"); //後面放healthRoute路徑
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json()); //express使用ejs作為模板引擎
 app.set("view engine", "ejs");
@@ -24,7 +25,7 @@ conn.connect(function (err) {
   console.log("connected");
 });
 
-app.use("/shop", shopRoute);
+app.use("/shop", shopRoute, healthRoute);
 app.get("*", (req, res) => {
   res.status(404).send("錯誤頁面喔。。。");
 });
