@@ -37,6 +37,7 @@ function splitFormatsAndImgs(products) {
 }
 
 // 將 conn.query 包裝成返回 Promise 的函數
+
 const query = util.promisify(conn.query).bind(conn);
 //首頁-查詢
 router.get("/", async (req, res) => {
@@ -170,7 +171,7 @@ router.post("/", async (req, res) => {
   const memberId = req.body.memberId;
   const productId = req.body.productId;
   const quantity = req.body.quantity;
-
+  console.log(memberId, productId, quantity);
   try {
     const existingItem = await query(
       "SELECT * FROM cartitems WHERE memberId = ? AND productId = ?",
@@ -278,9 +279,6 @@ router.post("/checkout", async (req, res) => {
       orderId,
     ]);
 
-    // 清空購物車 結帳完才清空購物車
-    // await query("DELETE FROM cartitems WHERE memberId = ?", [memberId]);
-
     res.json({ success: true, orderId: orderId });
   } catch (error) {
     console.error(error);
@@ -315,13 +313,18 @@ router.get("/order", async (req, res) => {
       `,
       [order[0].Id]
     );
-    console.log(orderItems);
     res.json({
       orderItems: orderItems,
       totalPrice: order[0].totalPrice,
       memberId: memberId,
       orderId: order[0].Id,
     });
+    // res.render("order", {
+    //   orderItems: orderItems,
+    //   totalPrice: order[0].totalPrice,
+    //   memberId: memberId,
+    //   orderId: order[0].Id,
+    // });
   } catch (error) {
     console.error(error);
     res.status(500).send("獲取訂單詳情失敗");

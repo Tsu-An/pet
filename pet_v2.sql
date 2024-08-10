@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- 主機： 127.0.0.1
--- 產生時間： 2024-08-09 17:24:09
+-- 產生時間： 2024-08-10 15:33:20
 -- 伺服器版本： 10.4.32-MariaDB
 -- PHP 版本： 8.2.12
 
@@ -259,8 +259,8 @@ CREATE TABLE `cartitems` (
 --
 
 INSERT INTO `cartitems` (`memberId`, `productId`, `cartQuantity`) VALUES
-(2, 1, 2),
-(2, 3, 1),
+(2, 10, 1),
+(2, 11, 1),
 (2, 12, 1);
 
 -- --------------------------------------------------------
@@ -838,6 +838,16 @@ INSERT INTO `ntag` (`id`, `name`) VALUES
 (2, '大型犬'),
 (3, '小型犬'),
 (4, '貓'),
+(5, '直播'),
+(1, '推薦'),
+(2, '大型犬'),
+(3, '小型犬'),
+(4, '貓'),
+(5, '直播'),
+(1, '推薦'),
+(2, '大型犬'),
+(3, '小型犬'),
+(4, '貓'),
 (5, '直播');
 
 -- --------------------------------------------------------
@@ -853,6 +863,16 @@ CREATE TABLE `orderitems` (
   `orderQuantity` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- 傾印資料表的資料 `orderitems`
+--
+
+INSERT INTO `orderitems` (`id`, `orderId`, `productId`, `orderQuantity`) VALUES
+(57, 33, 4, 1),
+(58, 33, 11, 1),
+(59, 34, 4, 1),
+(60, 34, 17, 1);
+
 -- --------------------------------------------------------
 
 --
@@ -865,6 +885,14 @@ CREATE TABLE `orders` (
   `totalPrice` int(10) NOT NULL,
   `status` varchar(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- 傾印資料表的資料 `orders`
+--
+
+INSERT INTO `orders` (`Id`, `memberId`, `totalPrice`, `status`) VALUES
+(33, 2, 450, 'paid off'),
+(34, 2, 360, 'paid off');
 
 -- --------------------------------------------------------
 
@@ -1150,7 +1178,7 @@ INSERT INTO `productshop` (`productId`, `productName`, `shid`, `fhid`, `bhId`, `
 (7, '《野起來吃 Wild Feeding》犬貓冷凍生食300g｜冷凍配送', 2, 7, 2, 'https://i.postimg.cc/pyMTNHKc/Wild-Feeding-300g.jpg', '■ 野起來吃專為毛小孩設計的頂級生食餐。利用高壓滅菌、殺蟲，安心又營養。營養成分皆符合美國飼料管理協會（AAFCO）。 \r\n■ 雲林號稱「養鵝王國」，台灣鵝產量一半來自雲林，雲林鵝肉富含豐富蛋白質、脂肪、鈣、磷、鐵、錳、維生素（A、B、C），是理想的高蛋白、低脂肪、低膽固醇的肉品，不僅脂肪含量低，而且品質好，不飽和脂肪酸的含量高，也是離胺酸相對精胺酸較高的肉品。\r\n\r\n【規格】\r\n■ 重量：300g \r\n■ 產地：台灣 \r\n■ 適用對象：狗／貓', NULL, 200, 0.8, 100),
 (8, '《天然密碼》皮膚毛髮保健｜無穀配方｜貓顆粒乾糧', 3, 8, 3, 'https://i.postimg.cc/RV0tTQ2b/image.jpg', '■ 添加10種功能性天然綜合超級食材。\r\n■ 87%動物性蛋白，0%穀物麩質、動物副產品。\r\n■ 添加益生菌及益菌生，呵護腸道幫助消化。\r\n■ 支持泌尿系統健康，幫助控制毛球。\r\n■ 鮭魚：不飽和脂肪酸，幫助貓咪皮膚及毛髮健康\r\n■ 鯡魚：富含牛磺酸，維持心血管、眼睛健康及維持自然抵抗力。\r\n■ 曼哈頓魚：含豐富的多元脂肪酸，幫助保護皮膚屏障\r\n■ 適合全年齡貓咪，提供完整的營養及豐富維生素與礦物質。\r\n\r\n【規格】 \r\n■ 重量：227g / 1.1kg / 5kg\r\n■ 產地：美國\r\n■ 適用對象：貓', NULL, 200, 0.8, 100),
 (9, '《天然密碼》皮膚毛髮保健｜無穀配方｜貓顆粒乾糧', 3, 9, 3, 'https://i.postimg.cc/J4jcd3XK/image.jpg', '■ 添加10種功能性天然綜合超級食材。\r\n■ 87%動物性蛋白，0%穀物麩質、動物副產品。\r\n■ 添加益生菌及益菌生，呵護腸道幫助消化。\r\n■ 支持泌尿系統健康，幫助控制毛球。\r\n■ 鮭魚：不飽和脂肪酸，幫助貓咪皮膚及毛髮健康\r\n■ 鯡魚：富含牛磺酸，維持心血管、眼睛健康及維持自然抵抗力。\r\n■ 曼哈頓魚：含豐富的多元脂肪酸，幫助保護皮膚屏障\r\n■ 適合全年齡貓咪，提供完整的營養及豐富維生素與礦物質。\r\n\r\n【規格】 \r\n■ 重量：227g / 1.1kg / 5kg\r\n■ 產地：美國\r\n■ 適用對象：貓', NULL, 250, 0.8, 100),
-(10, '《天然密碼》皮膚毛髮保健｜無穀配方｜貓顆粒乾糧', 3, 2, 3, 'https://i.postimg.cc/WzYw798T/image.jpg', '■ 添加10種功能性天然綜合超級食材。\r\n■ 89%動物性蛋白，0%穀物麩質、動物副產品。\r\n■ 添加益生菌及益菌生，呵護腸道幫助消化。\r\n■ 支持泌尿系統健康，幫助控制毛球。\r\n■ 雞肉：優質蛋白質，消化率高達92%。\r\n■ 鯡魚：富含牛磺酸，維持心血管、眼睛健康及維持自然抵抗力。\r\n■ 火雞肉：瘦肉蛋白質來源，適合腸胃敏感的貓咪。\r\n■ 適合幼貓及高活動量的貓咪，提供完整的營養及豐富維生素與礦物質。\r\n\r\n【規格】 \r\n■ 重量：227g / 1.1kg / 5kg\r\n■ 產地：美國\r\n■ 適用對象：貓', NULL, 220, 0.8, 100),
+(10, '《天然密碼》皮膚毛髮保健｜無穀配方｜貓顆粒乾糧', 3, 2, 3, 'https://i.postimg.cc/vmVtYBHR/image.jpg', '■ 添加10種功能性天然綜合超級食材。\r\n■ 89%動物性蛋白，0%穀物麩質、動物副產品。\r\n■ 添加益生菌及益菌生，呵護腸道幫助消化。\r\n■ 支持泌尿系統健康，幫助控制毛球。\r\n■ 雞肉：優質蛋白質，消化率高達92%。\r\n■ 鯡魚：富含牛磺酸，維持心血管、眼睛健康及維持自然抵抗力。\r\n■ 火雞肉：瘦肉蛋白質來源，適合腸胃敏感的貓咪。\r\n■ 適合幼貓及高活動量的貓咪，提供完整的營養及豐富維生素與礦物質。\r\n\r\n【規格】 \r\n■ 重量：227g / 1.1kg / 5kg\r\n■ 產地：美國\r\n■ 適用對象：貓', NULL, 220, 0.8, 100),
 (11, '《wanwan》｜無穀高齡貓關節護理配方｜貓顆粒乾糧', 4, 2, 6, 'https://i.postimg.cc/Ls8tXrb0/BOREAL.jpg', '■ 調整蛋白質、脂肪和纖維含量：適合熟齡貓或室內貓，照顧貓咪整體健康。\r\n■ 低升糖指數飲食：延長飽足感，減少血糖高峰，有助於控制血糖穩定。\r\n■ 獨家鋅專利礦物質配方：提供全方位的代謝和免疫支持。\r\n■ 含豐富消化酵素、益生菌和保健草本食材：照顧貓咪腸道健康。\r\n\r\n【規格】\r\n■ 重量：5LB（2.26kg）／12LB（5.44kg）\r\n■ 產地：加拿大\r\n■ 適用對象：貓', NULL, 300, 0.8, 100),
 (12, '《wanwan》｜無穀高齡貓關節護理配方｜貓顆粒乾糧', 4, 3, 6, 'https://i.postimg.cc/6pwLs7LK/BOREAL.jpg', '■ 調整蛋白質、脂肪和纖維含量：適合熟齡或室內貓，有助於體重控制。\r\n■ 高纖維、低脂肪配方：維護貓咪健康體態，有助於控制體重。\r\n■ 低升糖指數飲食：有助於維持貓咪健康血糖。\r\n■ 獨家鋅專利礦物質配方：提供全方位的代謝和免疫支持。\r\n■ 含豐富消化酵素、益生菌和保健草本食材：照顧貓咪腸道健康。\r\n\r\n【規格】\r\n■ 重量：5LB（2.26kg）／12LB（5.44kg）\r\n■ 產地：加拿大\r\n■ 適用對象：貓', NULL, 300, 0.8, 100),
 (13, '愛普士 Applaws全天然犬罐156g狗副食罐', 5, 2, 5, 'https://i.postimg.cc/1zvcxkLq/Applaws-156g.jpg', '■ 熱量：66kcal／100g \r\n\r\n■ 愛普士全天然犬罐所用之食材為特選有機飼料飼養之雞隻，均不施打抗生素及賀爾蒙以及天然海域中最上等之魚肉。 \r\n\r\n【規格】 \r\n■ 重量：156g\r\n■ 產地：泰國 \r\n■ 適用對象：狗', NULL, 160, 1, 100),
@@ -1483,13 +1511,13 @@ ALTER TABLE `members`
 -- 使用資料表自動遞增(AUTO_INCREMENT) `orderitems`
 --
 ALTER TABLE `orderitems`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
 
 --
 -- 使用資料表自動遞增(AUTO_INCREMENT) `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
 
 --
 -- 使用資料表自動遞增(AUTO_INCREMENT) `pets`
@@ -1514,57 +1542,10 @@ ALTER TABLE `users`
 --
 
 --
--- 資料表的限制式 `cartitems`
---
-ALTER TABLE `cartitems`
-  ADD CONSTRAINT `cartitems_ibfk_1` FOREIGN KEY (`memberId`) REFERENCES `members` (`memberId`),
-  ADD CONSTRAINT `cartitems_ibfk_2` FOREIGN KEY (`productId`) REFERENCES `productshop` (`productId`);
-
---
 -- 資料表的限制式 `heal`
 --
 ALTER TABLE `heal`
   ADD CONSTRAINT `heal_ibfk_1` FOREIGN KEY (`hid`) REFERENCES `eyesearsmouth` (`hid`);
-
---
--- 資料表的限制式 `orderitems`
---
-ALTER TABLE `orderitems`
-  ADD CONSTRAINT `orderitems_ibfk_2` FOREIGN KEY (`productId`) REFERENCES `productshop` (`productId`),
-  ADD CONSTRAINT `orderitems_ibfk_3` FOREIGN KEY (`orderId`) REFERENCES `orders` (`Id`);
-
---
--- 資料表的限制式 `orders`
---
-ALTER TABLE `orders`
-  ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`memberId`) REFERENCES `members` (`memberId`);
-
---
--- 資料表的限制式 `pets`
---
-ALTER TABLE `pets`
-  ADD CONSTRAINT `pets_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
-
---
--- 資料表的限制式 `productandclass`
---
-ALTER TABLE `productandclass`
-  ADD CONSTRAINT `productandclass_ibfk_1` FOREIGN KEY (`productClassid`) REFERENCES `productclass` (`productClassid`),
-  ADD CONSTRAINT `productandclass_ibfk_2` FOREIGN KEY (`productId`) REFERENCES `productshop` (`productId`);
-
---
--- 資料表的限制式 `productandtag`
---
-ALTER TABLE `productandtag`
-  ADD CONSTRAINT `productandtag_ibfk_1` FOREIGN KEY (`productTagId`) REFERENCES `producttag` (`productTagId`),
-  ADD CONSTRAINT `productandtag_ibfk_2` FOREIGN KEY (`productId`) REFERENCES `productshop` (`productId`);
-
---
--- 資料表的限制式 `productshop`
---
-ALTER TABLE `productshop`
-  ADD CONSTRAINT `productshop_ibfk_1` FOREIGN KEY (`bhId`) REFERENCES `productbrand` (`bhId`),
-  ADD CONSTRAINT `productshop_ibfk_2` FOREIGN KEY (`fhid`) REFERENCES `productformat` (`fhid`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
