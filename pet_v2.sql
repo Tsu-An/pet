@@ -1536,11 +1536,9 @@ ALTER TABLE `productshop`
 --
 ALTER TABLE `users`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
 --
 -- 已傾印資料表的限制式
 --
-
 --
 -- 資料表的限制式 `heal`
 --
