@@ -117,7 +117,7 @@ router.get("/", async (req, res) => {
       carouselevent, //輪播
       productClass, //產品類別
       products, //熱搜產品
-      // brand, //同品牌商品
+      brand, //同品牌商品
       cartItems, //購物車
       memberId: 2, //會員
     });
