@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- 主機： 127.0.0.1
--- 產生時間： 2024-08-10 15:33:20
+-- 產生時間： 2024-08-11 18:14:10
 -- 伺服器版本： 10.4.32-MariaDB
 -- PHP 版本： 8.2.12
 
@@ -253,15 +253,6 @@ CREATE TABLE `cartitems` (
   `productId` int(11) NOT NULL,
   `cartQuantity` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- 傾印資料表的資料 `cartitems`
---
-
-INSERT INTO `cartitems` (`memberId`, `productId`, `cartQuantity`) VALUES
-(2, 10, 1),
-(2, 11, 1),
-(2, 12, 1);
 
 -- --------------------------------------------------------
 
@@ -863,16 +854,6 @@ CREATE TABLE `orderitems` (
   `orderQuantity` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- 傾印資料表的資料 `orderitems`
---
-
-INSERT INTO `orderitems` (`id`, `orderId`, `productId`, `orderQuantity`) VALUES
-(57, 33, 4, 1),
-(58, 33, 11, 1),
-(59, 34, 4, 1),
-(60, 34, 17, 1);
-
 -- --------------------------------------------------------
 
 --
@@ -885,14 +866,6 @@ CREATE TABLE `orders` (
   `totalPrice` int(10) NOT NULL,
   `status` varchar(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- 傾印資料表的資料 `orders`
---
-
-INSERT INTO `orders` (`Id`, `memberId`, `totalPrice`, `status`) VALUES
-(33, 2, 450, 'paid off'),
-(34, 2, 360, 'paid off');
 
 -- --------------------------------------------------------
 
@@ -1511,13 +1484,13 @@ ALTER TABLE `members`
 -- 使用資料表自動遞增(AUTO_INCREMENT) `orderitems`
 --
 ALTER TABLE `orderitems`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=66;
 
 --
 -- 使用資料表自動遞增(AUTO_INCREMENT) `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
 
 --
 -- 使用資料表自動遞增(AUTO_INCREMENT) `pets`
@@ -1536,14 +1509,63 @@ ALTER TABLE `productshop`
 --
 ALTER TABLE `users`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
 --
 -- 已傾印資料表的限制式
 --
+
+--
+-- 資料表的限制式 `cartitems`
+--
+ALTER TABLE `cartitems`
+  ADD CONSTRAINT `cartitems_ibfk_1` FOREIGN KEY (`memberId`) REFERENCES `members` (`memberId`),
+  ADD CONSTRAINT `cartitems_ibfk_2` FOREIGN KEY (`productId`) REFERENCES `productshop` (`productId`);
+
 --
 -- 資料表的限制式 `heal`
 --
 ALTER TABLE `heal`
   ADD CONSTRAINT `heal_ibfk_1` FOREIGN KEY (`hid`) REFERENCES `eyesearsmouth` (`hid`);
+
+--
+-- 資料表的限制式 `orderitems`
+--
+ALTER TABLE `orderitems`
+  ADD CONSTRAINT `orderitems_ibfk_2` FOREIGN KEY (`productId`) REFERENCES `productshop` (`productId`),
+  ADD CONSTRAINT `orderitems_ibfk_3` FOREIGN KEY (`orderId`) REFERENCES `orders` (`Id`);
+
+--
+-- 資料表的限制式 `orders`
+--
+ALTER TABLE `orders`
+  ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`memberId`) REFERENCES `members` (`memberId`);
+
+--
+-- 資料表的限制式 `pets`
+--
+ALTER TABLE `pets`
+  ADD CONSTRAINT `pets_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
+
+--
+-- 資料表的限制式 `productandclass`
+--
+ALTER TABLE `productandclass`
+  ADD CONSTRAINT `productandclass_ibfk_1` FOREIGN KEY (`productClassid`) REFERENCES `productclass` (`productClassid`),
+  ADD CONSTRAINT `productandclass_ibfk_2` FOREIGN KEY (`productId`) REFERENCES `productshop` (`productId`);
+
+--
+-- 資料表的限制式 `productandtag`
+--
+ALTER TABLE `productandtag`
+  ADD CONSTRAINT `productandtag_ibfk_1` FOREIGN KEY (`productTagId`) REFERENCES `producttag` (`productTagId`),
+  ADD CONSTRAINT `productandtag_ibfk_2` FOREIGN KEY (`productId`) REFERENCES `productshop` (`productId`);
+
+--
+-- 資料表的限制式 `productshop`
+--
+ALTER TABLE `productshop`
+  ADD CONSTRAINT `productshop_ibfk_1` FOREIGN KEY (`bhId`) REFERENCES `productbrand` (`bhId`),
+  ADD CONSTRAINT `productshop_ibfk_2` FOREIGN KEY (`fhid`) REFERENCES `productformat` (`fhid`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
