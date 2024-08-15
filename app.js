@@ -24,7 +24,7 @@ conn.connect(function (err) {
   }
   console.log("connected");
 });
-
+//新增商品篩選路由
 app.use("/shop", shopRoute, healthRoute);
 app.get("*", (req, res) => {
   res.status(404).send("錯誤頁面喔。。。");
