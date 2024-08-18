@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- 主機： 127.0.0.1
--- 產生時間： 2024-08-11 18:14:10
+-- 產生時間： 2024-08-18 08:47:36
 -- 伺服器版本： 10.4.32-MariaDB
 -- PHP 版本： 8.2.12
 
@@ -950,79 +950,112 @@ CREATE TABLE `productandtag` (
 INSERT INTO `productandtag` (`productId`, `productTagId`) VALUES
 (1, 1),
 (1, 3),
+(1, 9),
 (1, 13),
 (2, 1),
 (2, 3),
+(2, 9),
 (2, 13),
 (3, 5),
+(3, 9),
+(3, 10),
 (3, 12),
 (3, 14),
 (4, 5),
+(4, 9),
+(4, 10),
 (4, 12),
 (4, 14),
 (5, 5),
+(5, 9),
+(5, 10),
 (5, 12),
 (5, 14),
 (6, 5),
+(6, 9),
+(6, 10),
 (6, 12),
 (6, 14),
 (7, 5),
+(7, 9),
+(7, 10),
 (7, 12),
 (7, 14),
 (8, 3),
+(8, 9),
 (8, 13),
 (8, 14),
 (9, 3),
+(9, 9),
 (9, 13),
 (9, 14),
 (10, 8),
+(10, 9),
 (10, 13),
 (10, 14),
+(11, 2),
 (11, 3),
 (11, 7),
+(11, 9),
 (11, 14),
 (12, 3),
-(12, 10),
+(12, 9),
 (12, 14),
-(13, 9),
+(13, 10),
 (13, 11),
 (13, 16),
-(14, 9),
+(14, 10),
 (14, 11),
 (14, 16),
-(15, 9),
+(15, 10),
 (15, 11),
 (15, 16),
-(16, 9),
+(16, 10),
 (16, 11),
 (16, 16),
 (17, 3),
+(17, 10),
 (17, 11),
 (17, 20),
 (18, 3),
+(18, 10),
 (18, 11),
 (18, 20),
 (19, 3),
+(19, 10),
 (19, 11),
 (19, 20),
+(20, 10),
 (20, 11),
 (20, 12),
 (20, 16),
+(21, 9),
+(21, 10),
 (21, 12),
 (21, 14),
 (21, 19),
+(22, 9),
+(22, 10),
 (22, 16),
 (22, 17),
 (22, 19),
+(23, 9),
+(23, 10),
 (23, 16),
 (23, 17),
 (23, 19),
+(24, 9),
+(24, 10),
 (24, 16),
 (24, 17),
 (24, 19),
+(25, 9),
+(25, 10),
 (25, 16),
 (25, 19),
 (25, 20),
+(26, 9),
+(26, 10),
 (26, 16),
 (26, 19),
 (26, 20);
@@ -1124,7 +1157,7 @@ INSERT INTO `productformat` (`fhid`, `format`) VALUES
 --
 
 CREATE TABLE `productshop` (
-  `productId` int(5) NOT NULL,
+  `productId` int(20) NOT NULL,
   `productName` varchar(50) DEFAULT NULL,
   `shid` int(255) NOT NULL,
   `fhid` int(100) DEFAULT NULL,
@@ -1145,7 +1178,7 @@ INSERT INTO `productshop` (`productId`, `productName`, `shid`, `fhid`, `bhId`, `
 (1, '《美喵人生 O\'KAT》冷凍乾燥生肉糧｜貓冷凍脫水乾糧', 1, 1, 1, 'https://i.postimg.cc/zfSgdJnz/O-KAT.jpg', '■  高含肉量：95.5%含肉量，優質蛋白質鮪魚、雞肉、雞肝，雞心。\r\n■  營養加倍：添加德國家醫貓王生食營養粉3％，補充維生素、礦物質、牛磺酸。\r\n■  優質保證：台灣製造經全國公證食品檢驗，符合AAFCO貓糧營養均衡標準。\r\n■  冷凍乾燥：保持食材完整營養，無麩質、無穀類、無玉米。\r\n\r\n【規格】\r\n■ 容量：70g / 300g\r\n■ 產地：台灣（添加德國家醫 貓王生食必須營養粉）\r\n■ 適用對象：貓', NULL, 200, 0.8, 10),
 (2, '《美喵人生 O\'KAT》冷凍乾燥生肉糧｜貓冷凍脫水乾糧', 1, 2, 1, 'https://i.postimg.cc/1XWTDhWM/O-KAT.jpg', '■  高含肉量：95.7%含肉量，優質蛋白質雞肉、雞肝，雞心。\r\n■  營養加倍：添加德國家醫貓王生食營養粉3％，補充維生素、礦物質、牛磺酸。\r\n■  優質保證：台灣製造經全國公證食品檢驗，符合AAFCO貓糧營養均衡標準。\r\n■  冷凍乾燥：保持食材完整營養，無麩質、無穀類、無玉米。\r\n\r\n【規格】\r\n■ 容量：70g / 300g\r\n■ 產地：台灣', NULL, 200, 0.85, 110),
 (3, '《野起來吃 Wild Feeding》犬貓冷凍生食300g｜冷凍配送', 2, 3, 2, 'https://i.postimg.cc/X7BFTN6L/Wild-Feeding-300g.jpg', '■ 野起來吃專為毛小孩設計的頂級生食餐。利用高壓滅菌、殺蟲，安心又營養。營養成分皆符合美國飼料管理協會（AAFCO）。 \r\n\r\n【規格】\r\n■ 重量：300g \r\n■ 產地：台灣 \r\n■ 適用對象：狗／貓', NULL, 200, 0.9, 100),
-(4, '《野起來吃 Wild Feeding》犬貓冷凍生食300g｜冷凍配送', 2, 4, 2, 'https://i.postimg.cc/J0kndnHB/Wild-Feeding-300g.jpg', '■ 野起來吃專為毛小孩設計的頂級生食餐。利用高壓滅菌、殺蟲，安心又營養。營養成分皆符合美國飼料管理協會（AAFCO）。 \r\n■ 阿拉斯加野生鮭魚，因為吃的是野生的小魚、小蝦，富含 Omega --不飽和脂肪酸，生長在無汙染海域。對比之下，養殖的挪威鮭魚與智利鮭魚因為吃的是飼料，所含 Omega-3 極少，也沒有殺蟲劑與乙氧䤆污染的問題。 \r\n\r\n【規格】 \r\n■ 重量：300g\r\n■ 產地：台灣 \r\n■ 適用對象：狗／貓', NULL, 150, 1, 100),
+(4, '《野起來吃 Wild Feeding》犬貓冷凍生食300g｜冷凍配送', 2, 4, 2, 'https://i.postimg.cc/J0kndnHB/Wild-Feeding-300g.jpg', '■ 野起來吃專為毛小孩設計的頂級生食餐。利用高壓滅菌、殺蟲，安心又營養。營養成分皆符合美國飼料管理協會（AAFCO）。 \r\n■ 阿拉斯加野生鮭魚，因為吃的是野生的小魚、小蝦，富含 Omega --不飽和脂肪酸，生長在無汙染海域。對比之下，養殖的挪威鮭魚與智利鮭魚因為吃的是飼料，所含 Omega-3 極少，也沒有殺蟲劑與乙氧䤆污染的問題。 \r\n\r\n【規格】 \r\n■ 重量：300g\r\n■ 產地：台灣 \r\n■ 適用對象：狗／貓', NULL, 200, 1, 100),
 (5, '《野起來吃 Wild Feeding》犬貓冷凍生食300g｜冷凍配送', 2, 5, 2, 'https://i.postimg.cc/3R6NBpNT/Wild-Feeding-300g.jpg', '■ 野起來吃專為毛小孩設計的頂級生食餐。利用高壓滅菌、殺蟲，安心又營養。營養成分皆符合美國飼料管理協會（AAFCO）。 \r\n\r\n【規格】 \r\n■ 重量：300g \r\n■ 產地：台灣 \r\n■ 適用對象：狗／貓', NULL, 200, 0.8, 100),
 (6, '《野起來吃 Wild Feeding》犬貓冷凍生食300g｜冷凍配送', 2, 6, 2, 'https://i.postimg.cc/4xbKgmL6/Wild-Feeding-300g.jpg', '■ 野起來吃專為毛小孩設計的頂級生食餐。利用高壓滅菌、殺蟲，安心又營養。營養成分皆符合美國飼料管理協會（AAFCO）。 \r\n\r\n【規格】\r\n■ 重量：300g \r\n■ 產地：台灣 \r\n■ 適用對象：狗／貓', NULL, 200, 0.8, 100),
 (7, '《野起來吃 Wild Feeding》犬貓冷凍生食300g｜冷凍配送', 2, 7, 2, 'https://i.postimg.cc/pyMTNHKc/Wild-Feeding-300g.jpg', '■ 野起來吃專為毛小孩設計的頂級生食餐。利用高壓滅菌、殺蟲，安心又營養。營養成分皆符合美國飼料管理協會（AAFCO）。 \r\n■ 雲林號稱「養鵝王國」，台灣鵝產量一半來自雲林，雲林鵝肉富含豐富蛋白質、脂肪、鈣、磷、鐵、錳、維生素（A、B、C），是理想的高蛋白、低脂肪、低膽固醇的肉品，不僅脂肪含量低，而且品質好，不飽和脂肪酸的含量高，也是離胺酸相對精胺酸較高的肉品。\r\n\r\n【規格】\r\n■ 重量：300g \r\n■ 產地：台灣 \r\n■ 適用對象：狗／貓', NULL, 200, 0.8, 100),
@@ -1193,8 +1226,8 @@ INSERT INTO `producttag` (`productTagId`, `tagName`) VALUES
 (6, '添加益生菌'),
 (7, '關節保健'),
 (8, '消化保健'),
-(9, '飽足感'),
-(10, '化毛調理'),
+(9, '貓'),
+(10, '狗'),
 (11, '幼犬'),
 (12, '成犬'),
 (13, '幼貓'),
@@ -1484,13 +1517,13 @@ ALTER TABLE `members`
 -- 使用資料表自動遞增(AUTO_INCREMENT) `orderitems`
 --
 ALTER TABLE `orderitems`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=66;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=72;
 
 --
 -- 使用資料表自動遞增(AUTO_INCREMENT) `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
 
 --
 -- 使用資料表自動遞增(AUTO_INCREMENT) `pets`
@@ -1502,7 +1535,7 @@ ALTER TABLE `pets`
 -- 使用資料表自動遞增(AUTO_INCREMENT) `productshop`
 --
 ALTER TABLE `productshop`
-  MODIFY `productId` int(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `productId` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- 使用資料表自動遞增(AUTO_INCREMENT) `users`
