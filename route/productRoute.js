@@ -13,29 +13,20 @@ const conn = mysql.createConnection({
 
 //把formats和productImgs內容用逗號隔開
 function splitFormatsAndImgs(products) {
-  if (!Array.isArray(products)) {
-    console.error("splitFormatsAndImgs received non-array:", products);
-    return [];
-  }
   return products.map((product) => {
+    const splitAndTrim = (str) =>
+      str ? str.split(",").map((item) => item.trim()) : [];
+    const splitAndTrimAndParseFloat = (str) =>
+      str ? str.split(",").map((item) => parseFloat(item.trim())) : [];
+
     return {
       ...product,
-      productIds: product.productId
-        ? product.productId.split(",").map((productId) => productId.trim())
-        : [],
-      formats: product.formats
-        ? product.formats.split(",").map((format) => format.trim())
-        : [],
-      fhids: product.fhids
-        ? product.fhids.split(",").map((fhid) => fhid.trim())
-        : [],
-      prices: product.prices
-        ? product.prices.split(",").map((price) => Number(price))
-        : [],
-      discounts: product.discounts
-        ? product.discounts.split(",").map((discount) => Number(discount))
-        : [],
-      productImgs: product.productImgs ? product.productImgs.split(",") : [],
+      productIds: splitAndTrim(product.productId),
+      formats: splitAndTrim(product.formats),
+      fhids: splitAndTrim(product.fhids),
+      prices: splitAndTrimAndParseFloat(product.prices),
+      discounts: splitAndTrimAndParseFloat(product.discounts),
+      productImgs: splitAndTrim(product.productImgs),
     };
   });
 }
@@ -71,13 +62,13 @@ router.get("/products", async (req, res) => {
         ps.shid
     `);
     // console.log("Products before sending:", products);
-    // res.render("products", {
+    // res.json({
     //   products: splitFormatsAndImgs(products),
     //   memberId: req.body.memberId || 2, // req.session.memberId || 2假設使用 session，或者硬編碼為 2
     //   brands: brands,
     //   tags: tags,
     // });
-    res.json({
+    res.render("products", {
       products: splitFormatsAndImgs(products),
       memberId: req.body.memberId || 2, // req.session.memberId || 2假設使用 session，或者硬編碼為 2
       brands: brands,
@@ -92,51 +83,70 @@ router.get("/products", async (req, res) => {
 // 篩選商品
 router.post("/products/filter", async (req, res) => {
   const { brands, tags } = req.body;
-
   try {
     let sqlQuery = `
       SELECT 
-        ps.shid,
-        GROUP_CONCAT(DISTINCT ps.productId ORDER BY pf.fhid) AS productId,
-        MAX(ps.productName) AS productName,
-        MAX(ps.bhId) AS bhId,
-        MAX(ps.productContent) AS productContent,
-        MAX(ps.productContentimg) AS productContentimg,
-        MAX(ps.quantity) AS quantity,
-        GROUP_CONCAT(DISTINCT pf.format ORDER BY pf.fhid) AS formats,
-        GROUP_CONCAT(DISTINCT pf.fhid ORDER BY pf.fhid) AS fhids,
-        GROUP_CONCAT(DISTINCT ps.price ORDER BY pf.fhid) AS prices,
-        GROUP_CONCAT(DISTINCT ps.productDiscount ORDER BY pf.fhid) AS discounts,
-        GROUP_CONCAT(DISTINCT ps.productImg ORDER BY pf.fhid) AS productImgs
-      FROM 
-        productshop ps
-      JOIN 
-        productformat pf ON ps.fhid = pf.fhid
-      JOIN
-        productandtag pt ON ps.productId = pt.productId
+        main.shid,
+        main.productId,
+        main.productName,
+        main.bhId,
+        main.productContent,
+        main.productContentimg,
+        main.quantity,
+        main.formats,
+        main.fhids,
+        GROUP_CONCAT(prices.price ORDER BY prices.productId) AS prices,
+        GROUP_CONCAT(prices.productDiscount ORDER BY prices.productId) AS discounts,
+        main.productImgs
+      FROM (
+        SELECT 
+          ps.shid,
+          GROUP_CONCAT(DISTINCT ps.productId ORDER BY ps.productId) AS productId,
+          MAX(ps.productName) AS productName,
+          MAX(ps.bhId) AS bhId,
+          MAX(ps.productContent) AS productContent,
+          MAX(ps.productContentimg) AS productContentimg,
+          MAX(ps.quantity) AS quantity,
+          GROUP_CONCAT(DISTINCT pf.format ORDER BY ps.productId) AS formats,
+          GROUP_CONCAT(DISTINCT pf.fhid ORDER BY ps.productId) AS fhids,
+          GROUP_CONCAT(DISTINCT ps.productImg ORDER BY ps.productId) AS productImgs
+        FROM 
+          productshop ps
+        JOIN 
+          productformat pf ON ps.fhid = pf.fhid
+        LEFT JOIN
+          productandtag pt ON ps.productId = pt.productId
+        ${brands && brands.length > 0 ? "WHERE ps.bhId IN (?)" : ""}
+        ${
+          tags && tags.length > 0
+            ? (brands && brands.length > 0 ? "AND" : "WHERE") +
+              " pt.productTagId IN (?)"
+            : ""
+        }
+        GROUP BY 
+          ps.shid
+        ${
+          tags && tags.length > 0
+            ? "HAVING COUNT(DISTINCT pt.productTagId) = ?"
+            : ""
+        }
+      ) AS main
+      JOIN (
+        SELECT DISTINCT productId, price, productDiscount
+        FROM productshop
+      ) AS prices ON FIND_IN_SET(prices.productId, main.productId)
+      GROUP BY 
+        main.shid
     `;
 
-    const conditions = [];
     const values = [];
-
-    if (brands && brands.length > 0) {
-      conditions.push("ps.bhId IN (?)");
-      values.push(brands);
-    }
-
+    if (brands && brands.length > 0) values.push(brands);
     if (tags && tags.length > 0) {
-      conditions.push("pt.productTagId IN (?)");
       values.push(tags);
+      values.push(tags.length);
     }
-
-    if (conditions.length > 0) {
-      sqlQuery += " WHERE " + conditions.join(" AND ");
-    }
-
-    sqlQuery += " GROUP BY ps.shid";
 
     const products = await query(sqlQuery, values);
-    console.log("Products before sending:", products);
     res.json({ products: splitFormatsAndImgs(products) });
   } catch (error) {
     console.error(error);
